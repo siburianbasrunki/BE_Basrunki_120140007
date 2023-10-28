@@ -1,16 +1,14 @@
 from pyramid.config import Configurator
-from sqlalchemy import create_engine
-from .models.mymodels import Base, DBSession
+from sqlalchemy import engine_from_config
+from .model.myModel import Product
 
 def main(global_config, **settings):
-    engine = create_engine(settings['sqlalchemy.url'])
-    DBSession.configure(bind=engine)
-    Base.metadata.bind = engine
-
     config = Configurator(settings=settings)
-    config.include('pyramid_jinja2')
-    config.add_static_view(name='static', path='BeUts:static')
-    config.add_route('home', '/')
-    config.add_route('add_product', '/add_product')
-    config.scan()
+    
+    
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    config.include('pyramid_sqlalchemy')
+    config.registry['dbsession'] = session_factory(engine)
+    
+
     return config.make_wsgi_app()
